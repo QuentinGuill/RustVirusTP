@@ -96,7 +96,7 @@ pub fn launch_server() {
                 };
 
                 //on affiche un message informant de la réussite de la conextion
-                println!("Client connecté: {}", adr);
+                println!("Client connecté: {}", adress);
                 send_message(stream);
             }
             Err(e) => {

