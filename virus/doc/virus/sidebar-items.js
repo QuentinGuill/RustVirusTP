@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["establish_connection","Cette fonction établie la connection avec le serveur."],["execute_command","Cette fonction récupère le parametre command et l’execute."],["receive_message","Cette fonction reçois les messages envoyés par le serveur, et les envoie à [execute_command]"]]});
