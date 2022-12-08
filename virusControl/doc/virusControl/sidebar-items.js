@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["get_entry","Cette fonction récupère l’entrée console"],["launch_server","Cette fonction établie la connection au serveur."],["send_message","Cette fonction envoie un message au client."]]});
