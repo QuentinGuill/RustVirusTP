@@ -16,7 +16,9 @@ use std::io::{Write, Read, stdin};
 pub fn get_entry() -> String {
     let mut buf = String::new();
 
+    //Lit une ligne de la console
     stdin().read_line(&mut buf).expect("Impossible de lire la console...");
+    //enleve les caracteres spéciaux
     buf.replace("\n", "").replace("\r", "")
 }
 
@@ -31,48 +33,69 @@ pub fn send_message(mut stream: TcpStream) {
     let mut buf = [0 as u8; 128];
     let time = 0;
 
+    //On rentre dans la console
     loop {
+        //On ajoute un character de ligne pour montrer que l'insertion est prete
         write!(io, "> ").expect("L'interface console à échoué...");
+        //On flush la console
         io.flush().expect("flush impossible...");
+        //On récupère l'input de l'utilisateur
         match &*get_entry() {
+            //si quite
             "quit" => {
+                //On arrete le programme
                 println!("Au revoir!");
                 return;
             }
+            //Si une autre ligne est entré
             line => {
+                //On l'envoie au serveur
                 write!(stream, "{}\n", line).expect("L'envoie de message au serveur à échoué...");
+                //On lit la réponse
                 match stream.read(&mut buf) {
-                    Ok(received) => {
-                        if received < 1 {
+                    //Si elle est recu
+                    Ok(reponse) => {
+                        //si la reponse est vide
+                        if reponse < 1 {
+                            //on quite la fonction
                             println!("Perdu la connexion au serveur");
                             return;
                         }
                     }
+                    //Si il y a une erreur
                     Err(_) => {
+                        //On quite la fonction
                         println!("Perdu la connexion au serveur");
                         return;
                     }
                 }
+                //On affiche la réponse du serveur
                 println!("Réponse du serveur : {:?}", std::str::from_utf8(&buf).unwrap().to_string());
             }
         }
+        //L'application attends avant de demander une nouvelle requete
         sleep(Duration::new(0,time));
     }
 }
 
-///Cette fonction établie la connection au serveur.
+///Cette fonction attends que le client se connecte.
 pub fn launch_server() {
+    //On écoute les message provenant du client
     let listener = TcpListener::bind("192.168.122.1:1234").unwrap();
 
-    println!("En attente d'un client...");
+    println!("En attente d'un client...");  
+    //On récupère le stream
     for stream in listener.incoming() {
+        //On regarde la valeur du stream
         match stream {
             Ok(stream) => {
+                //Et on récupere son adresse
                 let adress = match stream.peer_addr() {
                     Ok(adr) => format!("[adresse : {}]", adr),
                     Err(_) => "inconnue".to_owned()
                 };
 
+                //on affiche un message informant de la réussite de la conextion
                 println!("Client connecté: {}", adr);
                 send_message(stream);
             }
